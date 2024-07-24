@@ -62,13 +62,3 @@ def Conexionbd():
 
         else:
             print("Error al conectar a la base de datos:", err)
-
-        
-
-
-
-
-
-
-
-

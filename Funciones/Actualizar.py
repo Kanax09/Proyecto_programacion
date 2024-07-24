@@ -75,8 +75,6 @@ def Actualizar_estudiante(cursor,conexion):
                         estudiante.2do_apellido = %s,
                         estudiante.edad = %s,
                         estudiante.cedula = %s,
-                        estudiante.operaciones = %s,
-                        estudiante.alergias = %s,
                         estudiante.cedula_representante = %s
                         WHERE 1er_nombre = %s AND 2do_nombre= %s AND 1er_apellido=%s AND 2do_apellido= %s;'''
             
@@ -88,15 +86,13 @@ def Actualizar_estudiante(cursor,conexion):
             new_ape2= input ("Ingrese el segundo apellido: ")
             new_eda= int(input ("Ingrese la edad: "))
             new_ced= input ("Ingrese la cedula(Si no tiene ingrese 0): ")
-            new_op= input("Tuvo operaciones?:")
-            new_ale=input("Tiene alergias?:")
             new_repre=int(input("Ingrese la cedula del representante:")) 
 
             if new_ced == "0":
                 new_ced="X"
 
             #tiene que seguir el orden segun la sentencia
-            crede= (new_id,new_nom1,new_nom2,new_ape1,new_ape2,new_eda,new_ced,new_op,new_ale,new_repre,nom1,nom2,ape1,ape2)
+            crede= (new_id,new_nom1,new_nom2,new_ape1,new_ape2,new_eda,new_ced,new_repre,nom1,nom2,ape1,ape2)
             cursor.execute(actualizar,crede)
             conexion.commit()
 

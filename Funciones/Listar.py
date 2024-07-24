@@ -1,4 +1,4 @@
-
+import mysql.connector
 def Mostrar_representante(cursor):
 
     try:
@@ -7,6 +7,7 @@ def Mostrar_representante(cursor):
         #si quisieramos hacer una busqueda tendriamos que hacer una variable donde el usuario pase la cedula
         #y printe todo cuando la cedula sea == que la cedula que le pasamos
         cursor.execute("SELECT * FROM representantes")
+        
         print("\n============================")
         for cedula,nombre,apellido,telefono,direccion in cursor:
             print ("Cedula: ", cedula)
@@ -16,8 +17,8 @@ def Mostrar_representante(cursor):
             print ("Direccion: ", direccion)
             print ("=====================")
 
-    except Exception as error:
-        print("Ocurrio un error",error)
+    except mysql.connector.Error:
+        print("Genere una tabla primero mediante el comando ingresar")
 
 
 def Mostrar_estudiante(cursor):
@@ -30,7 +31,7 @@ def Mostrar_estudiante(cursor):
         #y funcionaria aqui como un objeto siendo e.id referente al id del estudiante
         
         inner= '''
-                SELECT e.id,e.1er_nombre,e.2do_nombre,e.1er_apellido,e.2do_apellido,r.cedula,r.nombres
+                SELECT e.id,e.1er_nombre,e.2do_nombre,e.1er_apellido,e.2do_apellido,r.cedula,r.nombres,r.direccion
                 FROM estudiante AS e 
                 INNER JOIN representantes AS r ON e.cedula_representante = r.cedula
                 
@@ -38,14 +39,15 @@ def Mostrar_estudiante(cursor):
     
         cursor.execute(inner)
         print("\n============================")
-        for id,nom1,nom2,ape1,ape2,ci_repre,r_nom in cursor:
+        for id,nom1,nom2,ape1,ape2,ci_repre,r_nom,direccion in cursor:
             print ("id: ", id)
             print (f"Nombres: {nom1} {nom2}")
             print (f"Apellidos: {ape1} {ape2}")
             print ("Cedula del representante: ", ci_repre)
             print ("Nombre del representante: ", r_nom)
+            print ("Direccion: ", direccion)
             print ("=====================")
 
-    except Exception as error:
-        print("Ocurrio un error",error)
+    except mysql.connector.Error:
+        print("Ocurrio un error")
 
