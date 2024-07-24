@@ -1,6 +1,41 @@
 #Si no lo tienen instalar: pip install mysql-connector-python
 import mysql.connector 
 
+
+def tabla_representantes(cursor):
+
+    cursor.execute("USE escuela_danza")
+
+    tabla_sql = '''
+                CREATE TABLE IF NOT EXISTS representantes (
+                cedula INT PRIMARY KEY,
+                nombres VARCHAR(300),
+                apellidos VARCHAR(300),
+                telefono INT,
+                direccion VARCHAR (300)
+                        )
+                    '''
+    cursor.execute(tabla_sql)
+
+def tabla_estudiante(cursor):
+
+    cursor.execute("USE escuela_danza")
+
+    tabla_sql = '''
+                CREATE TABLE IF NOT EXISTS estudiante (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                1er_nombre VARCHAR(300),
+                2do_nombre VARCHAR(300),
+                1er_apellido VARCHAR(300),
+                2do_apellido VARCHAR(300),
+                edad INT,
+                cedula VARCHAR (300),
+                cedula_representante INT,
+				FOREIGN KEY (cedula_representante) REFERENCES representantes (cedula));
+                    '''
+    
+    cursor.execute(tabla_sql)
+
 def Conexionbd():
 
     # Credenciales de la conexion, lo unico que tienen que cambiar es el host, el user y la password a las credenciales que tengan
@@ -49,6 +84,8 @@ def Conexionbd():
             cur.execute(f"CREATE DATABASE {database}")
             print(f"Base de datos '{database}' creada correctamente.")
 
+            
+
             Conexion = mysql.connector.connect(
             host=host,
             user=user,
@@ -57,6 +94,8 @@ def Conexionbd():
             charset=charset,
             collation=collation
         )
+            tabla_representantes(cur)
+            tabla_estudiante(cur)
 
             return Conexion
 

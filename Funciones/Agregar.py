@@ -2,16 +2,6 @@
 def Agregar_representante(cursor,conexion):
                 #Aqui en caso de que no exista la tabla se crea automaticamente
                 #si no existe claro esta
-                tabla_sql = '''
-                CREATE TABLE IF NOT EXISTS representantes (
-                cedula INT PRIMARY KEY,
-                nombres VARCHAR(300),
-                apellidos VARCHAR(300),
-                telefono INT,
-                direccion VARCHAR (300)
-                        )
-                    '''
-                cursor.execute(tabla_sql)
                   
                 try:
                     agregar= "INSERT INTO representantes VALUES (%s,%s,%s,%s,%s);"              
@@ -36,21 +26,6 @@ def Agregar_estudiante(cursor,conexion):
         
          #Aqui en caso de que no exista la tabla se crea automaticamente
          #si no existe claro esta
-        
-        tabla_sql = '''
-                CREATE TABLE IF NOT EXISTS estudiante (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                1er_nombre VARCHAR(300),
-                2do_nombre VARCHAR(300),
-                1er_apellido VARCHAR(300),
-                2do_apellido VARCHAR(300),
-                edad INT,
-                cedula VARCHAR (300),
-                cedula_representante INT,
-				FOREIGN KEY (cedula_representante) REFERENCES representantes (cedula));
-                    '''
-        
-        cursor.execute(tabla_sql)
 
         try:
 
