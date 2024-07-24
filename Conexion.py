@@ -11,7 +11,7 @@ def tabla_representantes(cursor):
                 cedula INT PRIMARY KEY,
                 nombres VARCHAR(300),
                 apellidos VARCHAR(300),
-                telefono INT,
+                telefono VARCHAR(300),
                 direccion VARCHAR (300)
                         )
                     '''

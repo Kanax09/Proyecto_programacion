@@ -9,7 +9,7 @@ def Agregar_representante(cursor,conexion):
                     ci= int(input("Ingrese la cedula:"))
                     nom= input("Ingrese los nombres: ")
                     ape=input("Ingrese los apellidos: ")
-                    tlf= int(input("Ingrese la telefono: "))
+                    tlf= input("Ingrese la telefono: ")
                     dir= input("Ingrese la direccion:")
 
 
