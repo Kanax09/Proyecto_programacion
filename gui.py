@@ -268,7 +268,7 @@ def mostrar_estudiantes():
 
 # ventana principal
 root = tk.Tk()
-root.title("Gestión de Escuela de Danza")
+root.title("Sistema de Registro Kellyart")
 
 # Crear pestañas
 notebook = ttk.Notebook(root)
