@@ -3,12 +3,14 @@ from tkinter import ttk
 from tkinter import messagebox
 import re
 from Conexion import Conexionbd
+from fpdf import FPDF
+from datetime import datetime
 
 # Funciones para obtener datos de la base de datos
 def obtener_datos_representantes():
     conexion = Conexionbd()
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM representantes")
+    cursor.execute("SELECT cedula, nombres, apellidos, telefono, direccion FROM representantes")
     datos = cursor.fetchall()
     cursor.close()
     conexion.close()
@@ -37,7 +39,7 @@ def validar_nombre_apellido(nombre_apellido):
     return bool(re.match(r"^[a-zA-Z\s]+$", nombre_apellido))  # Solo letras y espacios
 
 def validar_edad(edad):
-    return edad.isdigit() and 1 <= int(edad) <= 20
+    return edad.isdigit() and 5 <= int(edad) <= 16
 
 def validar_datos_representante(ci, nom, ape, tlf, dir):
     if not validar_cedula(str(ci)):
@@ -62,7 +64,7 @@ def validar_datos_estudiante(nom1, nom2, ape1, ape2, eda, ci, ci_repre):
         messagebox.showwarning("Advertencia", "Los apellidos solo deben contener letras y espacios.")
         return False
     if not validar_edad(str(eda)):
-        messagebox.showwarning("Advertencia", "La edad debe ser un número entre 1 y 120.")
+        messagebox.showwarning("Advertencia", "La edad debe ser un número entre 1 y 16.")
         return False
     if not validar_cedula(str(ci)) and ci != "X":
         messagebox.showwarning("Advertencia", "La cédula debe contener solo números.")
@@ -266,9 +268,96 @@ def mostrar_estudiantes():
 
     tree.pack(fill=tk.BOTH, expand=True)
 
+def generar_reporte_representantes():
+    datos = obtener_datos_representantes()
+
+    class PDF(FPDF):
+        def header(self):
+            self.image('logo.png', 10, 5, 30, 17, 'png')
+            self.set_font('Arial', 'B', 15)
+            self.cell(80)
+            self.cell(30, 10, 'REPORTE REPRESENTANTES', 0, 0, 'C')
+            self.ln(20)
+
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial', 'I', 8)
+            self.cell(0, 10, 'N° Pagina ' + str(self.page_no()) + '/{nb}', 0, 0, 'C')
+
+    fecha_actual = datetime.now()
+    nombre_archivo = fecha_actual.strftime("Representantes_%Y-%m-%d_%H-%M") + ".pdf"
+
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_font('Arial', "", 10)
+
+    pdf.cell(w=12, h=15, txt='#', border=1, align='C', fill=0)
+    pdf.cell(w=25, h=15, txt='C.I', border=1, align='C', fill=0)
+    pdf.cell(w=37, h=15, txt='Nombres', border=1, align='C', fill=0)
+    pdf.cell(w=37, h=15, txt='Apellidos', border=1, align='C', fill=0)
+    pdf.cell(w=30, h=15, txt='Telefono', border=1, align='C', fill=0)
+    pdf.multi_cell(w=0, h=15, txt='Dirección', border=1, align='C', fill=0)
+
+    for i, dato in enumerate(datos, 1):
+        ci, nombres, apellidos, telefono, direccion = dato
+        pdf.cell(w=12, h=8, txt=str(i), border=1, align='C', fill=0)
+        pdf.cell(w=25, h=8, txt=str(ci), border=1, align='C', fill=0)
+        pdf.cell(w=37, h=8, txt=nombres, border=1, align='C', fill=0)
+        pdf.cell(w=37, h=8, txt=apellidos, border=1, align='C', fill=0)
+        pdf.cell(w=30, h=8, txt=telefono, border=1, align='C', fill=0)
+        pdf.multi_cell(w=0, h=8, txt=direccion, border=1, align='C', fill=0)
+
+    pdf.output(nombre_archivo, 'F')
+    messagebox.showinfo("Éxito", f"Reporte de representantes generado exitosamente: {nombre_archivo}")
+
+def generar_reporte_estudiantes():
+    datos = obtener_datos_estudiantes()
+
+    class PDF(FPDF):
+        def header(self):
+            self.image('logo.png', 10, 5, 30, 17, 'png')
+            self.set_font('Arial', 'B', 15)
+            self.cell(80)
+            self.cell(30, 10, 'REPORTE ESTUDIANTES', 0, 0, 'C')
+            self.ln(20)
+
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial', 'I', 8)
+            self.cell(0, 10, 'N° Pagina ' + str(self.page_no()) + '/{nb}', 0, 0, 'C')
+
+    fecha_actual = datetime.now()
+    nombre_archivo = fecha_actual.strftime("Estudiantes_%Y-%m-%d_%H-%M") + ".pdf"
+
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_font('Arial', "", 10)
+
+    pdf.cell(w=14, h=15, txt='ID', border=1, align='C', fill=0)
+    pdf.cell(w=45, h=15, txt='Nombres', border=1, align='C', fill=0)
+    pdf.cell(w=45, h=15, txt='Apellidos', border=1, align='C', fill=0)
+    pdf.cell(w=15, h=15, txt='Edad', border=1, align='C', fill=0)
+    pdf.cell(w=35, h=15, txt='C.I', border=1, align='C', fill=0)
+    pdf.cell(w=36, h=15, txt='C.I Representante', border=1, align='C', fill=0)
+    pdf.ln()
+
+    for i, dato in enumerate(datos, 1):
+        pdf.cell(w=14, h=8, txt=str(i), border=1, align='C', fill=0)
+        pdf.cell(w=45, h=8, txt=f"{dato[1]} {dato[2]}", border=1, align='C', fill=0)
+        pdf.cell(w=45, h=8, txt=f"{dato[3]} {dato[4]}", border=1, align='C', fill=0)
+        pdf.cell(w=15, h=8, txt=str(dato[5]), border=1, align='C', fill=0)
+        pdf.cell(w=35, h=8, txt=dato[6], border=1, align='C', fill=0)
+        pdf.multi_cell(w=0, h=8, txt=str(dato[7]), border=1, align='C', fill=0)
+
+
+    pdf.output(nombre_archivo, 'F')
+    messagebox.showinfo("Éxito", f"Reporte de estudiantes generado exitosamente: {nombre_archivo}")
+
 # ventana principal
 root = tk.Tk()
-root.title("Gestión de Escuela de Danza")
+root.title("Sistema de Registro Kellyart")
 
 # Crear pestañas
 notebook = ttk.Notebook(root)
@@ -309,6 +398,7 @@ btn_frame_representantes.pack(pady=10, fill=tk.X)
 tk.Button(btn_frame_representantes, text="Agregar Representante", command=agregar_representante, bg="#45a049", fg="white", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
 tk.Button(btn_frame_representantes, text="Eliminar Representante", command=eliminar_representante, bg="#d32f2f", fg="white", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
 tk.Button(btn_frame_representantes, text="Actualizar Representante", command=actualizar_representante, bg="#1976D2", fg="white", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
+tk.Button(btn_frame_representantes, text="Generar Reporte PDF", command=generar_reporte_representantes, bg="#FFC107", fg="black", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
 
 # Tabla de Representantes
 tabla_representantes_frame = ttk.Frame(representantes_tab)
@@ -354,7 +444,7 @@ tk.Label(form_estudiantes, text="Edad:").grid(row=5, column=0, padx=5, pady=5)
 eda_entry = tk.Entry(form_estudiantes)
 eda_entry.grid(row=5, column=1, padx=5, pady=5)
 
-tk.Label(form_estudiantes, text="Cédula:").grid(row=6, column=0, padx=5, pady=5)
+tk.Label(form_estudiantes, text="Cédula (0 si no posee):").grid(row=6, column=0, padx=5, pady=5)
 ci_entry_est = tk.Entry(form_estudiantes)
 ci_entry_est.grid(row=6, column=1, padx=5, pady=5)
 
@@ -369,6 +459,7 @@ btn_frame_estudiantes.pack(pady=10, fill=tk.X)
 tk.Button(btn_frame_estudiantes, text="Agregar Estudiante", command=agregar_estudiante, bg="#45a049", fg="white", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
 tk.Button(btn_frame_estudiantes, text="Eliminar Estudiante", command=eliminar_estudiante, bg="#d32f2f", fg="white", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
 tk.Button(btn_frame_estudiantes, text="Actualizar Estudiante", command=actualizar_estudiante, bg="#1976D2", fg="white", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
+tk.Button(btn_frame_estudiantes, text="Generar Reporte PDF", command=generar_reporte_estudiantes, bg="#FFC107", fg="black", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
 
 # Tabla de Estudiantes
 tabla_estudiantes_frame = ttk.Frame(estudiantes_tab)
