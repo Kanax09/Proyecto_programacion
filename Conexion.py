@@ -11,7 +11,7 @@ def tabla_representantes(cursor):
                 cedula INT PRIMARY KEY,
                 nombres VARCHAR(300),
                 apellidos VARCHAR(300),
-                telefono VARCHAR(300),
+                telefono VARCHAR(10),
                 direccion VARCHAR (300)
                         )
                     '''
@@ -29,7 +29,7 @@ def tabla_estudiante(cursor):
                 1er_apellido VARCHAR(300),
                 2do_apellido VARCHAR(300),
                 edad INT,
-                cedula VARCHAR (300),
+                cedula VARCHAR (9),
                 cedula_representante INT,
 				FOREIGN KEY (cedula_representante) REFERENCES representantes (cedula));
                     '''

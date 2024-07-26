@@ -30,26 +30,34 @@ def obtener_datos_estudiantes():
 
 # Validaciones
 def validar_cedula(cedula):
-    return bool(re.match(r"^\d+$", cedula))
+    if not cedula.isdigit():
+        return False
+    if len(cedula) < 7:
+        messagebox.showwarning("Advertencia", "La cédula debe tener mínimo 7 dígitos.")
+        return False
+    if len(cedula) > 10:
+        messagebox.showwarning("Advertencia", "La cédula debe tener máximo 10 dígitos.")
+        return False
+    return True
 
 def validar_telefono(telefono):
     return bool(re.match(r"^\d{10}$", telefono))  # Asumiendo que el teléfono debe tener 10 dígitos
 
 def validar_nombre_apellido(nombre_apellido):
-    return bool(re.match(r"^[a-zA-Z\s]+$", nombre_apellido))  # Solo letras y espacios
+    # Verifica que solo haya un espacio entre palabras
+    return bool(re.match(r"^[a-zA-Z]+(?: [a-zA-Z]+)*$", nombre_apellido))
 
 def validar_edad(edad):
     return edad.isdigit() and 5 <= int(edad) <= 16
 
 def validar_datos_representante(ci, nom, ape, tlf, dir):
     if not validar_cedula(str(ci)):
-        messagebox.showwarning("Advertencia", "La cédula debe contener solo números.")
         return False
     if not validar_telefono(str(tlf)):
         messagebox.showwarning("Advertencia", "El teléfono debe tener 10 dígitos.")
         return False
     if not validar_nombre_apellido(nom) or not validar_nombre_apellido(ape):
-        messagebox.showwarning("Advertencia", "Los nombres y apellidos solo deben contener letras y espacios.")
+        messagebox.showwarning("Advertencia", "Los nombres y apellidos solo deben contener letras y un espacio entre palabras.")
         return False
     if not dir:
         messagebox.showwarning("Advertencia", "La dirección no puede estar vacía.")
@@ -58,19 +66,17 @@ def validar_datos_representante(ci, nom, ape, tlf, dir):
 
 def validar_datos_estudiante(nom1, nom2, ape1, ape2, eda, ci, ci_repre):
     if not validar_nombre_apellido(nom1) or not validar_nombre_apellido(nom2):
-        messagebox.showwarning("Advertencia", "Los nombres solo deben contener letras y espacios.")
+        messagebox.showwarning("Advertencia", "Los nombres solo deben contener letras y un espacio entre palabras.")
         return False
     if not validar_nombre_apellido(ape1) or not validar_nombre_apellido(ape2):
-        messagebox.showwarning("Advertencia", "Los apellidos solo deben contener letras y espacios.")
+        messagebox.showwarning("Advertencia", "Los apellidos solo deben contener letras y un espacio entre palabras.")
         return False
     if not validar_edad(str(eda)):
-        messagebox.showwarning("Advertencia", "La edad debe ser un número entre 1 y 16.")
+        messagebox.showwarning("Advertencia", "La edad debe ser un número entre 5 y 16.")
         return False
     if not validar_cedula(str(ci)) and ci != "X":
-        messagebox.showwarning("Advertencia", "La cédula debe contener solo números.")
         return False
     if not validar_cedula(str(ci_repre)):
-        messagebox.showwarning("Advertencia", "La cédula del representante debe contener solo números.")
         return False
     return True
 
