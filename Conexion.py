@@ -62,7 +62,7 @@ def Conexionbd():
         )
 
         #este print pueden borrarlo si les apetece
-        print("Conexión exitosa a la base de datos")
+        
 
         return Conexion
 

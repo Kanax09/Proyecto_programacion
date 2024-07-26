@@ -11,7 +11,7 @@ def iniciar_sesion():
 
     if username == USUARIO_ADMIN and password == CONTRASENA_ADMIN:
         root.destroy() 
-        import gui  
+        import Menu_Principal  
     else:
         messagebox.showwarning("Error", "Nombre de usuario o contraseña incorrectos")
 

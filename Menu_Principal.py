@@ -4,30 +4,14 @@ from tkinter import messagebox
 import re
 import mysql.connector
 from Conexion import Conexionbd
-from fpdf import FPDF
-from datetime import datetime
+from Funciones.Pdf import *
+from Funciones.Listar import *
+from Funciones.Agregar import *
+from Funciones.Eliminar import *
+from Funciones.Actualizar import *
 
-# Funciones para obtener datos de la base de datos
-def obtener_datos_representantes():
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
-    cursor.execute("SELECT cedula, nombres, apellidos, telefono, direccion FROM representantes")
-    datos = cursor.fetchall()
-    cursor.close()
-    conexion.close()
-    return datos
-
-def obtener_datos_estudiantes():
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
-    cursor.execute('''
-        SELECT e.id, e.1er_nombre, e.2do_nombre, e.1er_apellido, e.2do_apellido, e.edad, e.cedula, e.cedula_representante
-        FROM estudiante AS e
-    ''')
-    datos = cursor.fetchall()
-    cursor.close()
-    conexion.close()
-    return datos
+conexion=Conexionbd()
+cursor=conexion.cursor()
 
 # Validaciones
 def validar_cedula(cedula):
@@ -96,21 +80,19 @@ def agregar_representante():
     if not validar_datos_representante(ci, nom, ape, tlf, dir):
         return
 
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
     try:
-        cursor.execute("INSERT INTO representantes (cedula, nombres, apellidos, telefono, direccion) VALUES (%s, %s, %s, %s, %s)", (ci, nom, ape, tlf, dir))
-        conexion.commit()
+        agg__repre(cursor,conexion,ci,nom,ape,tlf,dir)
         messagebox.showinfo("Éxito", "Representante agregado exitosamente.")
         mostrar_representantes()
+        mostrar_estudiantes()    
+     
+        
     except mysql.connector.Error:
         messagebox.showerror("Error", f"Exceso de caracteres en los campos o usuario ya ingresado")
     except Exception as e:
         messagebox.showerror("Error", f"ocurrio un error {e}")
 
-    finally:
-        cursor.close()
-        conexion.close()
+
 
 def eliminar_representante():
     ci = ci_entry.get()
@@ -119,20 +101,17 @@ def eliminar_representante():
         messagebox.showwarning("Advertencia", "La cédula debe contener solo números.")
         return
 
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
     try:
-        cursor.execute("DELETE FROM estudiante WHERE cedula_representante = %s", (ci,))
-        cursor.execute("DELETE FROM representantes WHERE cedula = %s", (ci,))
-        conexion.commit()
+        
+        del__repre(cursor,conexion,ci)
         messagebox.showinfo("Éxito", "Representante y estudiantes asociados eliminados exitosamente.")
         mostrar_representantes()
         mostrar_estudiantes()
+          
+     
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
-    finally:
-        cursor.close()
-        conexion.close()
+    
 
 def actualizar_representante():
     ci = ci_entry.get()
@@ -147,21 +126,14 @@ def actualizar_representante():
 
     if not validar_datos_representante(ci, nom, ape, tlf, dir):
         return
-
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
     try:
-        cursor.execute("UPDATE representantes SET nombres = %s, apellidos = %s, telefono = %s, direccion = %s WHERE cedula = %s",
-                       (nom, ape, tlf, dir, ci))
-        conexion.commit()
+        act__repre(cursor,conexion,ci,nom,ape,tlf,dir)
+        
         messagebox.showinfo("Éxito", "Datos del representante actualizados exitosamente.")
         mostrar_representantes()
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
-    finally:
-        cursor.close()
-        conexion.close()
-
+    
 # Funciones CRUD para Estudiantes
 def agregar_estudiante():
     nom1 = nom1_entry.get()
@@ -182,38 +154,36 @@ def agregar_estudiante():
     if not validar_datos_estudiante(nom1, nom2, ape1, ape2, eda, ci, ci_repre):
         return
 
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
     try:
-        cursor.execute("INSERT INTO estudiante (1er_nombre, 2do_nombre, 1er_apellido, 2do_apellido, edad, cedula, cedula_representante) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                       (nom1, nom2, ape1, ape2, eda, ci, ci_repre))
-        conexion.commit()
+       
+        agg_stu(cursor,conexion,nom1, nom2, ape1, ape2, eda, ci, ci_repre)
         messagebox.showinfo("Éxito", "Estudiante agregado exitosamente.")
         mostrar_estudiantes()
+        
     except mysql.connector.Error:
         messagebox.showerror("Error", f"Representantes no encontrado")
 
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
-    finally:
-        cursor.close()
-        conexion.close()
+
 
 def eliminar_estudiante():
     id = id_entry_est.get()
 
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
+  
     try:
-        cursor.execute("DELETE FROM estudiante WHERE id = %s", (id,))
-        conexion.commit()
+        
+        del__stu(cursor,conexion,id)
         messagebox.showinfo("Éxito", "Estudiante eliminado exitosamente.")
         mostrar_estudiantes()
+
+    except mysql.connector.Error:
+        messagebox.showerror("Error", f"Id no enconrado")
+
+    
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
-    finally:
-        cursor.close()
-        conexion.close()
+    
 
 def actualizar_estudiante():
     id = id_entry_est.get()
@@ -235,25 +205,21 @@ def actualizar_estudiante():
     if not validar_datos_estudiante(nom1, nom2, ape1, ape2, eda, ci, ci_repre):
         return
 
-    conexion = Conexionbd()
-    cursor = conexion.cursor()
+    
     try:
-        cursor.execute("UPDATE estudiante SET 1er_nombre = %s, 2do_nombre = %s, 1er_apellido = %s, 2do_apellido = %s, edad = %s, cedula = %s, cedula_representante = %s WHERE id = %s",
-                       (nom1, nom2, ape1, ape2, eda, ci, ci_repre, id))
-        conexion.commit()
+
+        act__stud(cursor,conexion,nom1, nom2, ape1, ape2, eda, ci, ci_repre, id)
         messagebox.showinfo("Éxito", "Datos del estudiante actualizados exitosamente.")
         mostrar_estudiantes()
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
-    finally:
-        cursor.close()
-        conexion.close()
+
 
 def mostrar_representantes():
     for widget in tabla_representantes_frame.winfo_children():
         widget.destroy()
 
-    datos = obtener_datos_representantes()
+    datos = obtener_datos_representantes(cursor)
     columns = ["Cédula", "Nombres", "Apellidos", "Teléfono", "Dirección"]
     tree = ttk.Treeview(tabla_representantes_frame, columns=columns, show="headings")
     for col in columns:
@@ -269,7 +235,7 @@ def mostrar_estudiantes():
     for widget in tabla_estudiantes_frame.winfo_children():
         widget.destroy()
 
-    datos = obtener_datos_estudiantes()
+    datos = obtener_datos_estudiantes(cursor)
     columns = ["ID", "1er Nombre", "2do Nombre", "1er Apellido", "2do Apellido", "Edad", "Cédula", "Cédula Repre"]
     tree = ttk.Treeview(tabla_estudiantes_frame, columns=columns, show="headings")
     for col in columns:
@@ -282,91 +248,18 @@ def mostrar_estudiantes():
     tree.pack(fill=tk.BOTH, expand=True)
 
 def generar_reporte_representantes():
-    datos = obtener_datos_representantes()
+    datos = obtener_datos_representantes(cursor)
 
-    class PDF(FPDF):
-        def header(self):
-            self.image('logo.png', 10, 5, 30, 17, 'png')
-            self.set_font('Arial', 'B', 15)
-            self.cell(80)
-            self.cell(30, 10, 'REPORTE REPRESENTANTES', 0, 0, 'C')
-            self.ln(20)
-
-        def footer(self):
-            self.set_y(-15)
-            self.set_font('Arial', 'I', 8)
-            self.cell(0, 10, 'N° Pagina ' + str(self.page_no()) + '/{nb}', 0, 0, 'C')
-
-    fecha_actual = datetime.now()
-    nombre_archivo = fecha_actual.strftime("Representantes_%Y-%m-%d_%H-%M") + ".pdf"
-
-    pdf = PDF()
-    pdf.alias_nb_pages()
-    pdf.add_page()
-    pdf.set_font('Arial', "", 10)
-
-    pdf.cell(w=12, h=15, txt='#', border=1, align='C', fill=0)
-    pdf.cell(w=25, h=15, txt='C.I', border=1, align='C', fill=0)
-    pdf.cell(w=37, h=15, txt='Nombres', border=1, align='C', fill=0)
-    pdf.cell(w=37, h=15, txt='Apellidos', border=1, align='C', fill=0)
-    pdf.cell(w=30, h=15, txt='Telefono', border=1, align='C', fill=0)
-    pdf.multi_cell(w=0, h=15, txt='Dirección', border=1, align='C', fill=0)
-
-    for i, dato in enumerate(datos, 1):
-        ci, nombres, apellidos, telefono, direccion = dato
-        pdf.cell(w=12, h=8, txt=str(i), border=1, align='C', fill=0)
-        pdf.cell(w=25, h=8, txt=str(ci), border=1, align='C', fill=0)
-        pdf.cell(w=37, h=8, txt=nombres, border=1, align='C', fill=0)
-        pdf.cell(w=37, h=8, txt=apellidos, border=1, align='C', fill=0)
-        pdf.cell(w=30, h=8, txt=telefono, border=1, align='C', fill=0)
-        pdf.multi_cell(w=0, h=8, txt=direccion, border=1, align='C', fill=0)
-
-    pdf.output(nombre_archivo, 'F')
-    messagebox.showinfo("Éxito", f"Reporte de representantes generado exitosamente: {nombre_archivo}")
+    pdf__repre(datos)
+    
+    messagebox.showinfo("Éxito", f"Reporte de representantes generado exitosamente")
 
 def generar_reporte_estudiantes():
-    datos = obtener_datos_estudiantes()
+    datos = obtener_datos_estudiantes(cursor)
 
-    class PDF(FPDF):
-        def header(self):
-            self.image('logo.png', 10, 5, 30, 17, 'png')
-            self.set_font('Arial', 'B', 15)
-            self.cell(80)
-            self.cell(30, 10, 'REPORTE ESTUDIANTES', 0, 0, 'C')
-            self.ln(20)
-
-        def footer(self):
-            self.set_y(-15)
-            self.set_font('Arial', 'I', 8)
-            self.cell(0, 10, 'N° Pagina ' + str(self.page_no()) + '/{nb}', 0, 0, 'C')
-
-    fecha_actual = datetime.now()
-    nombre_archivo = fecha_actual.strftime("Estudiantes_%Y-%m-%d_%H-%M") + ".pdf"
-
-    pdf = PDF()
-    pdf.alias_nb_pages()
-    pdf.add_page()
-    pdf.set_font('Arial', "", 10)
-
-    pdf.cell(w=14, h=15, txt='ID', border=1, align='C', fill=0)
-    pdf.cell(w=45, h=15, txt='Nombres', border=1, align='C', fill=0)
-    pdf.cell(w=45, h=15, txt='Apellidos', border=1, align='C', fill=0)
-    pdf.cell(w=15, h=15, txt='Edad', border=1, align='C', fill=0)
-    pdf.cell(w=35, h=15, txt='C.I', border=1, align='C', fill=0)
-    pdf.cell(w=36, h=15, txt='C.I Representante', border=1, align='C', fill=0)
-    pdf.ln()
-
-    for i, dato in enumerate(datos, 1):
-        pdf.cell(w=14, h=8, txt=str(i), border=1, align='C', fill=0)
-        pdf.cell(w=45, h=8, txt=f"{dato[1]} {dato[2]}", border=1, align='C', fill=0)
-        pdf.cell(w=45, h=8, txt=f"{dato[3]} {dato[4]}", border=1, align='C', fill=0)
-        pdf.cell(w=15, h=8, txt=str(dato[5]), border=1, align='C', fill=0)
-        pdf.cell(w=35, h=8, txt=dato[6], border=1, align='C', fill=0)
-        pdf.multi_cell(w=0, h=8, txt=str(dato[7]), border=1, align='C', fill=0)
-
-
-    pdf.output(nombre_archivo, 'F')
-    messagebox.showinfo("Éxito", f"Reporte de estudiantes generado exitosamente: {nombre_archivo}")
+    pdf__stud(datos)
+    
+    messagebox.showinfo("Éxito", f"Reporte de estudiantes generado exitosamente:")
 
 # ventana principal
 root = tk.Tk()
