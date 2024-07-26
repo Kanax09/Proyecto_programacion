@@ -9,10 +9,10 @@ def tabla_representantes(cursor):
     tabla_sql = '''
                 CREATE TABLE IF NOT EXISTS representantes (
                 cedula INT PRIMARY KEY,
-                nombres VARCHAR(300),
-                apellidos VARCHAR(300),
+                nombres VARCHAR(50),
+                apellidos VARCHAR(50),
                 telefono VARCHAR(10),
-                direccion VARCHAR (300)
+                direccion VARCHAR (50)
                         )
                     '''
     cursor.execute(tabla_sql)
@@ -24,10 +24,10 @@ def tabla_estudiante(cursor):
     tabla_sql = '''
                 CREATE TABLE IF NOT EXISTS estudiante (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                1er_nombre VARCHAR(300),
-                2do_nombre VARCHAR(300),
-                1er_apellido VARCHAR(300),
-                2do_apellido VARCHAR(300),
+                1er_nombre VARCHAR(50),
+                2do_nombre VARCHAR(50),
+                1er_apellido VARCHAR(50),
+                2do_apellido VARCHAR(50),
                 edad INT,
                 cedula VARCHAR (9),
                 cedula_representante INT,

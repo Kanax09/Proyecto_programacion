@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import re
+import mysql.connector
 from Conexion import Conexionbd
 from fpdf import FPDF
 from datetime import datetime
@@ -102,8 +103,11 @@ def agregar_representante():
         conexion.commit()
         messagebox.showinfo("Éxito", "Representante agregado exitosamente.")
         mostrar_representantes()
+    except mysql.connector.Error:
+        messagebox.showerror("Error", f"Exceso de caracteres en los campos o usuario ya ingresado")
     except Exception as e:
-        messagebox.showerror("Error", f"Ocurrió un error: {e}")
+        messagebox.showerror("Error", f"ocurrio un error {e}")
+
     finally:
         cursor.close()
         conexion.close()
@@ -186,6 +190,9 @@ def agregar_estudiante():
         conexion.commit()
         messagebox.showinfo("Éxito", "Estudiante agregado exitosamente.")
         mostrar_estudiantes()
+    except mysql.connector.Error:
+        messagebox.showerror("Error", f"Representantes no encontrado")
+
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
     finally:
