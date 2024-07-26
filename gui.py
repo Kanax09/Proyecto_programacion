@@ -44,8 +44,7 @@ def validar_telefono(telefono):
     return bool(re.match(r"^\d{10}$", telefono))  # Asumiendo que el teléfono debe tener 10 dígitos
 
 def validar_nombre_apellido(nombre_apellido):
-    # Verifica que solo haya un espacio entre palabras
-    return bool(re.match(r"^[a-zA-Z]+(?: [a-zA-Z]+)*$", nombre_apellido))
+    return bool(re.match(r"^[a-zA-ZáéíóúüñÑ]+(?: [a-zA-ZáéíóúüñÑ]+)*$", nombre_apellido))
 
 def validar_edad(edad):
     return edad.isdigit() and 5 <= int(edad) <= 16
