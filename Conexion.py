@@ -12,7 +12,7 @@ def tabla_representantes(cursor):
                 nombres VARCHAR(300),
                 apellidos VARCHAR(300),
                 telefono VARCHAR(10),
-                direccion VARCHAR (300)
+                direccion VARCHAR (50)
                         )
                     '''
     cursor.execute(tabla_sql)
